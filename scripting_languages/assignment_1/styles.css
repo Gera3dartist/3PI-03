@@ -1,0 +1,13 @@
+.row {
+  display: flex;
+}
+
+.column {
+  flex: 50%;
+}
+
+.ul {
+  list-style-type: disc;
+  list-style-position: outside;
+  list-style-image: none;
+}
