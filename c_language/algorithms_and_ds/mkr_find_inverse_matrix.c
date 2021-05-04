@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define WIDTH 7
+
 /*
  * ЗАВДАННЯ:
  * Розробити програмний алгоритм, вибрати оптимальний тип даних та написати програму для знаходження матриці А-1 оберненої до заданої матриці А розмірності N * N та виконати перевірку А * А-1.
@@ -25,9 +27,11 @@ float* multiply_square_matrices(float* matrix1, float* matrix2, int size);
 float* multiply_by_scalar(float* matrix, int size, float scalar);
 float* get_cofactor(float* matrix, int size, int row, int col);
 float* get_adjoint_matrix(float* matrix, int size);
-int equals(float* matrix1, float* matrix2);
 void show_array (float *parray, int rows, int cols);
 float *get_minor_matrix(float* matrix, int size);
+float *get_input_matrix_from_file(char *filename);
+float *readMatrixFromFile(FILE *fp, int size);
+void dumpArrayIntoFile(float *parray, int rows, int cols, FILE *stream);
 
 
 int main(void) {
@@ -38,39 +42,55 @@ int main(void) {
      * 1 3 4 2
      * 4 3 1 3
      */
-    int size = 4;
+    FILE *infile, *outfile;
+    int size;
     float *inversed, *identity1, *identity2, det;
 
-    // input matrix
-    float input_matrix[16] = {3, 5, 2, 1, 2, 1, 2, 4, 1, 3, 4, 2, 4, 3, 1, 3};
-    
-    det = find_determinant(input_matrix, size);
-
-    printf("Determinant is: %f", det);
-    if (det == 0) {
-        printf("matrix can not be inverted");
+    infile = fopen("input.txt", "r");
+    outfile = fopen("outfile.txt", "w");
+    if (infile==NULL)
+    {
+        printf("no such file.");
+        return 0;
     }
-    printf("\noriginal matrix: \n");
+    // 1. read size and matrix from file
+    fscanf(infile, "%d", &size);
+    float *input_matrix = readMatrixFromFile(infile, size);
+    fclose(infile);
+    printf("\nOriginal matrix: \n");
     show_array(input_matrix, size, size);
 
+    // 2. find determinant
+    det = find_determinant(input_matrix, size);
+    printf("\nDeterminant is: %.0f\n", det);
+    if (det == 0) {
+        printf("matrix can not be inverted");
+        return 0;
+    }
+
+    // 3. Inverse matrix
     inversed = inverse_matrix(input_matrix, size, det);
-   
-    printf("Inversed matrix: \n");
+    printf("\nInversed matrix: \n");
     show_array(inversed, size, size);
 
+    // 4. Do verifications:  А * А-1 == 0 &&  А-1 * A == 0 
     identity1 = multiply_square_matrices(input_matrix, inversed, size);
     identity2 = multiply_square_matrices(inversed, input_matrix, size);
 
-    printf("Identity1 matrix: \n");
+    printf("\nIdentity1 matrix: \n");
     show_array(identity1, size, size);
 
-    printf("Identity2 matrix: \n");
+    printf("\nIdentity2 matrix: \n");
     show_array(identity2, size, size);
+    
+    // 5. store inversed matrix into file
+    dumpArrayIntoFile(inversed, size, size, outfile);
 
-
+    // 6. free pointers and files
     free(inversed);
     free(identity1);
     free(identity2);
+    fclose(outfile);
     return 0;
 }
 
@@ -78,7 +98,7 @@ int main(void) {
 void show_array (float *parray, int rows, int cols) {
   for (int i=0; i<rows; i++) {
     for (int j=0; j<cols; j++) {
-        printf("%.3f, ", *(parray + i * cols + j));
+        printf("%*.3f, ", WIDTH, *(parray + i * cols + j));
     }
     printf("\n");
     }
@@ -197,4 +217,33 @@ float* multiply_square_matrices(float* matrix1, float* matrix2, int size) {
         }
     }
     return resulting_matrix;
+}
+
+void dumpArrayIntoFile(float *parray, int rows, int cols, FILE *stream) {
+
+  for (int i=0; i<rows; i++) {
+    for (int j=0; j<cols; j++) {
+
+      fprintf(stream, " %*.3f ", WIDTH, *(parray + i * cols + j));
+    }
+    fprintf(stream, " \n");
+  }
+}
+
+float *readMatrixFromFile(FILE *fp, int size) {
+
+    float *input_matrix = calloc(size*size, sizeof(float));
+
+    char *to_parse = calloc(size*size*2, sizeof(char));
+    int counter = 0;
+    while(fgets(to_parse, 255, fp));
+	char *end = to_parse;
+	while(*end) {
+        *(input_matrix + counter++) = strtof(to_parse, &end);
+		while (*end == ',') {
+			end++;
+		}
+		to_parse = end;
+	}
+	return input_matrix;
 }
