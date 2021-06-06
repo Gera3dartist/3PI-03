@@ -44,7 +44,7 @@ typedef struct Node {
 // Public API single linked list
 
 void add_item(Node *node, Node **head);
-Node *edit_item_in_list(Employee *new_info, char *last, Node **list);
+Node *edit_item(Employee *new_info, char *last, Node **list);
 void remove_item(char *info, Node **list);
 void dump_into_file(FILE *fp, Node **list);
 Node *search_item(char *last, Node **list);
@@ -52,7 +52,7 @@ Node *load_list_from_file(FILE *fp);
 
 
 // utilities
-void edit_item(Employee *new_data, Node *node);
+void _edit_item(Employee *new_data, Node *node);
 void print_list(Node **list);
 void print_node(Node *list);
 Node *create_node(char *first, char *last, char *surename, char *position, int salary);
@@ -79,7 +79,7 @@ int main() {
 
     strcpy(search_query, "Міхновський");
     new_emp_data = create_employee(NULL, NULL, NULL, NULL, 1000);
-    edit_item_in_list(new_emp_data, search_query, &list);
+    edit_item(new_emp_data, search_query, &list);
     free(new_emp_data);
     remove_item("BAR", &list);
     
@@ -176,7 +176,7 @@ void add_item(Node *node, Node **head) {
     }
 }
 
-void edit_item(Employee *new_data, Node *node) {
+void _edit_item(Employee *new_data, Node *node) {
     if (strcmp(new_data->personal.first, "\0") != 0) strcpy(node->info.personal.first, new_data->personal.first);
     if (strcmp(new_data->personal.last, "\0") != 0) strcpy(node->info.personal.last, new_data->personal.last);
     if (strcmp(new_data->personal.surname,  "\0") != 0) strcpy(node->info.personal.surname, new_data->personal.surname);
@@ -184,10 +184,10 @@ void edit_item(Employee *new_data, Node *node) {
     if (new_data->salary != node->info.salary) node->info.salary = new_data->salary;
 }
 
-Node *edit_item_in_list(Employee *new_info, char *last, Node **list) {
+Node *edit_item(Employee *new_info, char *last, Node **list) {
     Node *node;
     if ((node = search_item(last, &(*list)))!= NULL){
-        edit_item(new_info, node);
+        _edit_item(new_info, node);
         return node;
     }
     return NULL;
