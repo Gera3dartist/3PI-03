@@ -19,7 +19,6 @@
  */
 
 
-
 typedef struct { 
     char first[MNAME];
     char last[MNAME];
@@ -31,9 +30,6 @@ typedef struct {
     char position[PNAME];
     float salary;
 } Employee;
-
-
-
 
 typedef struct Node {
     Employee info;
@@ -60,7 +56,6 @@ void free_list(Node** list);
 Employee *create_employee(char *first, char *last, char *surename, char *position, float salary);
 void print_empoyee(Employee *employee);
 int item_found (Node *node, char * query);
-
 
 int main() {
     Node *list = NULL, *single, *tmp, *result;
@@ -142,7 +137,6 @@ Node *create_node(char *first, char *last, char *surename, char *position, int s
     node->next = NULL;
     return node;
 }
-
 
 Employee *create_employee(char *first, char *last, char *surname, char *position, float salary) {
     Employee *employee = (Employee *)malloc(sizeof(Employee));
